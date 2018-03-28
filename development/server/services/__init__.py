@@ -1,0 +1,1 @@
+from server.services.commdity_recognition.commdity_recognition_decorator import commdity_recognition_decorator
