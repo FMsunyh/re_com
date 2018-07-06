@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-echo "start server"
+echo "reboot server"
+
+ps -aux|grep reco_server |grep -v grep|cut -c 9-15|xargs kill -9
+
 source deactivate
 source activate zjai_com
 

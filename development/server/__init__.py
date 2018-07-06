@@ -3,7 +3,7 @@
 import logging
 import logging.handlers
 
-from flask import Flask, g
+from flask import Flask
 from flask_restplus import Api
 
 from server.config import LOG_CONFIG
@@ -13,7 +13,6 @@ def __create_logger(conf):
     :param conf: log config
     :return: logger object
     """
-
     logger_ = logging.getLogger('model-detection-service')
     logger_.setLevel(conf['level'])
 
@@ -31,14 +30,7 @@ def __create_logger(conf):
 
     return logger_
 
-
 logger = __create_logger(LOG_CONFIG)
-
-# Flask API Object
-# app = Flask(__name__,
-#             static_folder='static',
-#             template_folder='static/client')
-
 
 def make_app():
     '''
@@ -48,10 +40,6 @@ def make_app():
             static_folder='static',
             template_folder='static/client')
 
-    # model = load_model()
-    # @app.before_first_request
-    # def add_server_to_globals():
-    #     g.model = load_model()
     return app
 
 app = make_app()

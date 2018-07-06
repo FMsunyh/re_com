@@ -3,18 +3,14 @@ import os
 
 LOG_CONFIG = {
     'level': 'DEBUG',
-    'filename': 'server.log'
+    'filename': 'server/log/server.log'
 }
 
 import socket
-HOST_NAME = socket.getfqdn(socket.gethostname()) == 'zjai-dev-007'
+# HOST_NAME = socket.getfqdn(socket.gethostname()) == 'zjai-dev-007'
 
-ROOT_DIR = '/home/syh/commdity_recognition/development/'
+# ROOT_DIR = '/home/syh/commdity_recognition/development/'
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
-OUTPUT_DIR = os.path.join(ROOT_DIR, 'server/static/images/')
-DOWNLOAD_DIR = os.path.join(ROOT_DIR, 'server/data/download/')
-
-HOST_IP = '192.168.1.184'
-# HOST_IP = '192.168.1.196'
-PROT = '16888'
-print('run -----')
+OUTPUT_DIR = os.path.join(ROOT_DIR, 'server','static','images')
+DOWNLOAD_DIR = os.path.join(ROOT_DIR, 'server', 'static', 'download')

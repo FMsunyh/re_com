@@ -1,4 +1,5 @@
+#!/usr/bin/env bash
 source deactivate
-source activate commdity
+source activate zjai_com
 
 python reco_server.py

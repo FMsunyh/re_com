@@ -9,6 +9,7 @@
 import keras
 import numpy as np
 
+import server.config
 from server.algorithm.retinanet import models
 from server.algorithm.retinanet.config import MODEL_PATH
 from server.algorithm.retinanet.utils.colors import label_color
@@ -30,12 +31,12 @@ keras.backend.tensorflow_backend.set_session(get_session())
 # load label to names mapping for visualization purposes
 labels_to_names = labels_to_names()
 
-def load_model(load=False):
+def load_model(load=True):
     if load:
         try:
             print('loading the model...............')
             model = models.load_model(MODEL_PATH, backbone_name='resnet50',convert=True)
-            image_path = '/home/syh/commdity_recognition/development/server/data/download/train_20180307_1725.jpg'
+            image_path = os.path.join(server.config.ROOT_DIR, 'server/static/download/train_20180307_1725.jpg')
             image = read_image_bgr(image_path)
             image = preprocess_image(image)
             image, scale = resize_image(image)
