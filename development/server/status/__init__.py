@@ -35,21 +35,21 @@ class APIStatus:
 
     NotFound = 100404
 
-    # Descriptions = {
-    #     Ok: '成功',
-    #     NotFound: '未找到该资源',
-    #     BadRequest: '请求参数有误',
-    #     InternalServerError: '服务器内部错误',
-    #     Forbidden: '拒绝该请求',
-    # }
-
     Descriptions = {
-        Ok: 'success',
-        NotFound: 'Not Find The Resource',
-        BadRequest: 'Bad Request',
-        InternalServerError: 'Internal Server Error',
-        Forbidden: 'Forbidden Request',
+        Ok: '成功',
+        NotFound: '未找到该资源',
+        BadRequest: '请求参数有误',
+        InternalServerError: '服务器内部错误',
+        Forbidden: '拒绝该请求',
     }
+
+    # Descriptions = {
+    #     Ok: 'success',
+    #     NotFound: 'Not Find The Resource',
+    #     BadRequest: 'Bad Request',
+    #     InternalServerError: 'Internal Server Error',
+    #     Forbidden: 'Forbidden Request',
+    # }
 
 
 def to_http_status(status):

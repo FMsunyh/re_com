@@ -95,7 +95,7 @@ class CommdityRecognitionImp(object):
                 data = get_prediect_label_bbox(boxes, scores, labels)
 
                 toc = time.time()
-                print(str(1000 * (toc - tic)) + " ms")
+                print("Request time: "+str(1000 * (toc - tic)) + " ms")
                 print(data)
                 return build_result(APIStatus.Ok, data=data), to_http_status(APIStatus.Ok)
             else:
@@ -187,9 +187,6 @@ class CommdityRecognitionImp(object):
     @staticmethod
     def get_image_from_base64(image_msg):
         base64_code = image_msg['payload']['data']['base64_code']
-        if base64_code == '':
-            return  None
-
         code = base64_code.split(',')[1]
 
         image = base64.b64decode(code)

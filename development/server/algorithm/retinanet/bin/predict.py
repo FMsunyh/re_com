@@ -11,7 +11,7 @@ import numpy as np
 
 import server.config
 from server.algorithm.retinanet import models
-from server.algorithm.retinanet.config import MODEL_PATH
+from server.algorithm.retinanet.config import MODEL_PATH,LOAD_MODEL
 from server.algorithm.retinanet.utils.colors import label_color
 from server.algorithm.retinanet.utils.image import read_image_bgr, preprocess_image, resize_image
 from server.algorithm.retinanet.utils.label import *
@@ -31,7 +31,7 @@ keras.backend.tensorflow_backend.set_session(get_session())
 # load label to names mapping for visualization purposes
 labels_to_names = labels_to_names()
 
-def load_model(load=True):
+def load_model(load=LOAD_MODEL):
     if load:
         try:
             print('loading the model...............')
@@ -68,24 +68,26 @@ def get_images(image_dir):
     return images
 
 def predict(image):
-    global predict_model
-    if predict_model is None:
-        predict_model = load_model()
+    if LOAD_MODEL:
+        global predict_model
+        if predict_model is None:
+            predict_model = load_model()
 
-    image = preprocess_image(image)
-    image, scale = resize_image(image)
+        image = preprocess_image(image)
+        image, scale = resize_image(image)
 
-    # print(predict_model.summary())
-    # process image
-    start = time.time()
-    boxes, scores, labels = predict_model.predict_on_batch(np.expand_dims(image, axis=0))
-    print("processing time: ", str(1000 * (time.time() - start)) + " ms")
+        # print(predict_model.summary())
+        # process image
+        start = time.time()
+        boxes, scores, labels = predict_model.predict_on_batch(np.expand_dims(image, axis=0))
+        print("processing time: ", str(1000 * (time.time() - start)) + " ms")
 
-    # # correct for image scale
-    boxes/= scale
+        # # correct for image scale
+        boxes/= scale
 
-    return boxes, scores, labels
-
+        return boxes, scores, labels
+    else:
+        return None, None, None
 
 threshold = 0.7
 def visualize(draw, predicted_labels, scores, detections):
@@ -103,28 +105,37 @@ def visualize(draw, predicted_labels, scores, detections):
 
     return draw
 
-# def get_prediect_label_bbox(boxes, scores, labels):
-#     data = []
-#     for box, score, label in zip(boxes[0], scores[0], labels[0]):
-#         # scores are sorted so we can break
-#         if score < threshold:
-#             break
-#
-#         caption = "{}".format(labels_to_names[label])
-#         score = "{:.3f}".format(score)
-#         box =box.astype(int)
-#         data.append("{},{},{},{},{},{}".format(caption, score, box[0], box[1],box[2], box[3] ))
+def get_prediect_label_bbox(boxes, scores, labels):
+    if LOAD_MODEL:
+        data = []
+        for box, score, label in zip(boxes[0], scores[0], labels[0]):
+            # scores are sorted so we can break
+            if score < threshold:
+                break
+
+            caption = "{}".format(labels_to_names[label])
+            score = "{:.3f}".format(score)
+            box =box.astype(int)
+            data.append("{},{},{},{},{},{}".format(caption, score, box[0], box[1],box[2], box[3] ))
+        return data
+    else:
+        data = ["{},{:.3f},{},{},{},{}".format('glg-glgblzbg-hz-mcxcw-45g', 0.931, 1049, 570, 1492, 1103)]
+        data.append("{},{:.3f},{},{},{},{}".format('bl-blht-dz-yw-6.7g',0.850,493,516,1121,1148))
+        data.append("{},{:.3f},{},{},{},{}".format('bl-blht-dz-yw-6.7g',0.850,493,516,1121,1148))
+        data.append("{},{:.3f},{},{},{},{}".format('wwsp-wwxxs-dz-yw-60g',0.838,660,253,1248,591))
+        data.append("{},{:.3f},{},{},{},{}".format('wwsp-wwxxs-dz-yw-60g',0.838,660,253,1248,591))
+        data.append("{},{:.3f},{},{},{},{}".format('wwsp-wwxxs-dz-yw-60g',0.838,660,253,1248,591))
+        return data
+
+
+# def get_prediect_label_bbox(predicted_labels, scores, detections):
+#     data = ["{},{:.3f},{},{},{},{}".format('glg-glgblzbg-hz-mcxcw-45g',0.931,1049,570,1492,1103)]
+#     data.append("{},{:.3f},{},{},{},{}".format('bl-blht-dz-yw-6.7g',0.850,493,516,1121,1148))
+#     data.append("{},{:.3f},{},{},{},{}".format('bl-blht-dz-yw-6.7g',0.850,493,516,1121,1148))
+#     data.append("{},{:.3f},{},{},{},{}".format('wwsp-wwxxs-dz-yw-60g',0.838,660,253,1248,591))
+#     data.append("{},{:.3f},{},{},{},{}".format('wwsp-wwxxs-dz-yw-60g',0.838,660,253,1248,591))
+#     data.append("{},{:.3f},{},{},{},{}".format('wwsp-wwxxs-dz-yw-60g',0.838,660,253,1248,591))
 #     return data
-
-
-def get_prediect_label_bbox(predicted_labels, scores, detections):
-    data = ["{},{:.3f},{},{},{},{}".format('glg-glgblzbg-hz-mcxcw-45g',0.931,1049,570,1492,1103)]
-    data.append("{},{:.3f},{},{},{},{}".format('bl-blht-dz-yw-6.7g',0.850,493,516,1121,1148))
-    data.append("{},{:.3f},{},{},{},{}".format('bl-blht-dz-yw-6.7g',0.850,493,516,1121,1148))
-    data.append("{},{:.3f},{},{},{},{}".format('wwsp-wwxxs-dz-yw-60g',0.838,660,253,1248,591))
-    data.append("{},{:.3f},{},{},{},{}".format('wwsp-wwxxs-dz-yw-60g',0.838,660,253,1248,591))
-    data.append("{},{:.3f},{},{},{},{}".format('wwsp-wwxxs-dz-yw-60g',0.838,660,253,1248,591))
-    return data
 
 # def get_class_count(predicted_labels, scores):
 #     classes_count = {}
