@@ -14,3 +14,4 @@ ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
 OUTPUT_DIR = os.path.join(ROOT_DIR, 'server','static','images')
 DOWNLOAD_DIR = os.path.join(ROOT_DIR, 'server', 'static', 'download')
+WEIGHT_PATH = os.path.join(ROOT_DIR, 'server', 'weights','rel_weight.h5')
