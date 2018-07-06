@@ -1,4 +1,4 @@
 source deactivate
-source activate image_retriveal
+source activate commdity
 
-python server.py
+python reco_server.py

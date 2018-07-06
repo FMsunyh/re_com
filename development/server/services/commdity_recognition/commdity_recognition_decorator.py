@@ -11,69 +11,92 @@ import cv2
 import requests
 from PIL import Image
 
-from server.algorithm.keras_retinanet.bin.predict import predict, visualize, get_class_count
+from server.algorithm.retinanet.bin.predict import predict, visualize, get_prediect_label_bbox
 from server import logger
 from server.config import DOWNLOAD_DIR, OUTPUT_DIR
 from server.services.commdity_recognition.model import ImageInfo
 from server.status import build_result, APIStatus, to_http_status
 from server.utils import build_passing_decorator_class
-from server.algorithm.keras_retinanet.utils.image import read_image_bgr
+from server.algorithm.retinanet.utils.image import read_image_bgr
 
+import numpy as np
+
+import server.config
 
 class CommdityRecognitionImp(object):
+
+    # @staticmethod
+    # def recognition(ok, source):
+    #     try:
+    #         if ok:
+    #
+    #             tic = time.time()
+    #             # img_url = CommdityRecognitionImp.get_urls(source)
+    #             image_path, file_name = CommdityRecognitionImp.get_image(source)
+    #
+    #             image_path = '/home/syh/commdity_recognition/development/server/data/download/train_20180307_1725.jpg'
+    #             if image_path != '':
+    #                 imageinfo = CommdityRecognitionImp.create_imageinfo(file_name=file_name)
+    #                 imageinfo.path = image_path
+    #
+    #             # elif img_url != '':
+    #             #     imageinfo = CommdityRecognitionImp.create_imageinfo(url=img_url)
+    #             #     imageinfo.address = img_url
+    #             #     CommdityRecognitionImp.download_image(imageinfo, output_dir=DOWNLOAD_DIR)
+    #
+    #
+    #             print('start processing.............................................')
+    #             # 1. get image
+    #             image = read_image_bgr(imageinfo.path)
+    #             # copy to draw on
+    #
+    #             # 2. predict
+    #             # boxes, scores, labels = predict(image)
+    #             boxes, scores, labels = (1,1,1)
+    #
+    #             data = get_prediect_label_bbox(boxes, scores, labels)
+    #             # make the return data
+    #             # im_draw = visualize(draw, predicted_labels, scores, detections)
+    #
+    #             # im = Image.fromarray(im_draw)
+    #             # im_path = os.path.join(OUTPUT_DIR, str(imageinfo.name)+imageinfo.image_extension)
+    #             # im.save(im_path)
+    #
+    #             toc = time.time()
+    #             print(str(1000 * (toc-tic)) + " ms")
+    #
+    #             # out_path = '{}:{}{}{}'.format(server.config.HOST_IP, server.config.PROT, '/static/images/',str(imageinfo.name) + imageinfo.image_extension)
+    #             # print(out_path)
+    #             # data['address'] = out_path
+    #
+    #
+    #
+    #             return build_result(APIStatus.Ok, data=data), to_http_status(APIStatus.Ok)
+    #         else:
+    #             return source, to_http_status(source['status'])
+    #
+    #     except Exception as e:
+    #         logger.error('occur error: %s', e, exc_info=True)
+    #         return build_result(APIStatus.InternalServerError), to_http_status(APIStatus.InternalServerError)
 
     @staticmethod
     def recognition(ok, source):
         try:
             if ok:
-
                 tic = time.time()
-                img_url = CommdityRecognitionImp.get_urls(source)
-                image_path, file_name = CommdityRecognitionImp.get_image(source)
-
-                if image_path != '':
-                    imageinfo = CommdityRecognitionImp.create_imageinfo(file_name=file_name)
-                    imageinfo.path = image_path
-
-                elif img_url != '':
-                    imageinfo = CommdityRecognitionImp.create_imageinfo(url=img_url)
-                    imageinfo.address = img_url
-                    CommdityRecognitionImp.download_image(imageinfo, output_dir=DOWNLOAD_DIR)
-
-
                 print('start processing.............................................')
+
                 # 1. get image
-                image = read_image_bgr(imageinfo.path)
-                # copy to draw on
-                draw = image.copy()
-                draw = cv2.cvtColor(draw, cv2.COLOR_BGR2RGB)
+                image =  CommdityRecognitionImp.get_image_from_base64(source)
 
                 # 2. predict
-                predicted_labels, scores, detections = predict(image)
-
-                data = get_class_count(predicted_labels, scores)
-
-                # make the return data
-                im_draw = visualize(draw, predicted_labels, scores, detections)
-
-                im = Image.fromarray(im_draw)
-                im_path = os.path.join(OUTPUT_DIR, str(imageinfo.name)+imageinfo.image_extension)
-                im.save(im_path)
-
-                # res = yoins_search(classify=classify_name, query_fea_str=query_image)
-                #
-                # # res = test_search("")
-                # data = dict()
-                # for i, item in enumerate(res):
-                #     data[str(i)] = item
-                # # data = {"1": "1.jpg"}
+                boxes, scores, labels = predict(image)
+                # boxes, scores, labels = (1,1,1)
+                data = get_prediect_label_bbox(boxes, scores, labels)
 
                 toc = time.time()
-                print(str(1000 * (toc-tic)) + " ms")
-
-                out_path = '{}{}{}'.format('192.168.1.184:16888', '/static/images/',str(imageinfo.name) + imageinfo.image_extension)
-                # print(out_path)
-                data['address'] = out_path
+                print(str(1000 * (toc - tic)) + " ms")
+                print(data)
                 return build_result(APIStatus.Ok, data=data), to_http_status(APIStatus.Ok)
             else:
                 return source, to_http_status(source['status'])
@@ -81,7 +104,6 @@ class CommdityRecognitionImp(object):
         except Exception as e:
             logger.error('occur error: %s', e, exc_info=True)
             return build_result(APIStatus.InternalServerError), to_http_status(APIStatus.InternalServerError)
-
     @staticmethod
     def get_urls(source):
         urls = source['payload']['data']['image_address']
@@ -166,21 +188,20 @@ class CommdityRecognitionImp(object):
     def get_image_from_base64(image_msg):
         base64_code = image_msg['payload']['data']['base64_code']
         if base64_code == '':
-            return '', '', ''
+            return  None
 
         code = base64_code.split(',')[1]
-        suffix = base64_code.split(',')[0].split(';')[0].split('/')[1]
 
         image = base64.b64decode(code)
         img = Image.open(BytesIO(image))
 
         file_name = uuid.uuid1()
-        image_path = '%s%s%s%s' % (DOWNLOAD_DIR, file_name, '.', suffix)
-        # CommdityRecognitionImp.im_save(image_path, img)
-        #
-        # print("file name:", file_name)
-        # print("image path:", image_path)
-        return image_path, file_name,img
+        image_path = '%s%s%s%s' % (DOWNLOAD_DIR, file_name, '.', 'jpg')
+        CommdityRecognitionImp.im_save(image_path, img)
+
+        img = np.asarray(img.convert('RGB'))
+
+        return img[:, :, ::-1].copy()
 
     @staticmethod
     def im_save(path, image):

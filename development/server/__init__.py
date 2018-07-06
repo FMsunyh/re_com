@@ -3,11 +3,10 @@
 import logging
 import logging.handlers
 
-from flask import Flask
+from flask import Flask, g
 from flask_restplus import Api
 
 from server.config import LOG_CONFIG
-
 
 def __create_logger(conf):
     """
@@ -36,9 +35,26 @@ def __create_logger(conf):
 logger = __create_logger(LOG_CONFIG)
 
 # Flask API Object
-app = Flask(__name__,
+# app = Flask(__name__,
+#             static_folder='static',
+#             template_folder='static/client')
+
+
+def make_app():
+    '''
+    Application factory: http://flask.pocoo.org/docs/0.10/patterns/appfactories/
+    '''
+    app = Flask(__name__,
             static_folder='static',
             template_folder='static/client')
+
+    # model = load_model()
+    # @app.before_first_request
+    # def add_server_to_globals():
+    #     g.model = load_model()
+    return app
+
+app = make_app()
 
 app.config['SECRET_KEY'] = 'development'
 

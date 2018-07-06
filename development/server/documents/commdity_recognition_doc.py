@@ -23,9 +23,14 @@ from server.documents.common import *
 # }))
 
 
+# request_urls_post = api.doc(body=api.model('request_urls_post', {
+#     'data': fields.Nested(model=api.model('commdity_recognition', {
+#         'image_address': fields.String(description='image address', required=False),
+#         'base64_code': fields.String(description='image base64_code', required=False)}))
+# }))
+
 request_urls_post = api.doc(body=api.model('request_urls_post', {
     'data': fields.Nested(model=api.model('commdity_recognition', {
-        'image_address': fields.String(description='image address', required=False),
         'base64_code': fields.String(description='image base64_code', required=False)}))
 }))
 
