@@ -169,7 +169,7 @@ class CommdityRecognitionImp(object):
         if base64_code =='':
             return '', ''
 
-        # code = base64_code.json[23:]
+        # code = test.json[23:]
         code = base64_code.split(',')[1]
         suffix = base64_code.split(',')[0].split(';')[0].split('/')[1]
 
