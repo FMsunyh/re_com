@@ -15,6 +15,14 @@ class CommdityRecognition(Resource):
     def post(self):
          return add_payload(*add_root())
 
+class CommdityRecognitionFRNN(Resource):
+
+    @services.commdity_recognition_decorator.recognition_frnn
+    @documents.request_urls_post
+    # @validators.check(check_payload)
+    def post(self):
+         return add_payload(*add_root())
 
 ns = api.namespace(name="commdity_recognition", description='commdity recognition interface')
 ns.add_resource(CommdityRecognition, '/recognition')
+ns.add_resource(CommdityRecognitionFRNN, '/recognition_frcnn')

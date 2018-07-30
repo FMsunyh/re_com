@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 def print_args(args):
     if args is None:
@@ -57,10 +57,10 @@ def parse_args():
                         default='voc_2007_test', type=str)
     parser.add_argument('--epochs', dest='epochs',
                         help='epoch of iteration to train',
-                        default=10, type=int)
+                        default=50, type=int)
     parser.add_argument('--iters', dest='max_iters',
                         help='number of iterations to train',
-                        default=70000, type=int)
+                        default=80000, type=int)
     parser.add_argument('--tag', dest='tag',
                         help='tag of the model',
                         default=None, type=str)
@@ -68,8 +68,11 @@ def parse_args():
                         help='vgg16, res50, res101, res152, mobile',
                         default='vgg16', type=str)
     parser.add_argument('--set', dest='set_cfgs',
-                        help='set config keys', default=['ANCHOR_SCALES', '[8,16,32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'TRAIN.STEPSIZE', '[50000]'],
+                        help='set config keys', default=['ANCHOR_SCALES', '[8,16,32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'TRAIN.STEPSIZE', '[2400000]'],
                         nargs=argparse.REMAINDER)
+    parser.add_argument('--package_name', dest='package_name',
+                        help='train_data1,train_data2,train_data3',
+                        default=['all_train_data_resize2'], type=list)
     args = parser.parse_args()
     print('*'*20)
     print_args(args)
@@ -91,18 +94,24 @@ def load_base_network():
         raise NotImplementedError
     return net
 
-def prepare_datas():
+def prepare_datas(package_name):
     # train set
     # imdb, roidb = combined_roidb(args.imdb_name)
-    imdb, roidb = calc_roidb(args.imdb_name)
+    imdb, roidb = calc_roidb(args.imdb_name,package_name)
     logger.info('{:d} roidb entries'.format(len(roidb)))
 
     # also add the validation set, but with no flipping images
-    orgflip = cfg.TRAIN.USE_FLIPPED
-    cfg.TRAIN.USE_FLIPPED = False
-    _, valroidb = calc_roidb(args.imdbval_name)
+    hor_orgflip = cfg.TRAIN.USE_HOR_FLIPPED
+    ver_orgflip = cfg.TRAIN.USE_VER_FLIPPED
+    org_bright_adjuset = cfg.TRAIN.BRIGHT_ADJUEST
+    cfg.TRAIN.USE_HOR_FLIPPED = False
+    cfg.TRAIN.USE_VER_FLIPPED = False
+    cfg.TRAIN.BRIGHT_ADJUEST = False
+    _, valroidb = calc_roidb(args.imdbval_name,package_name)
     logger.info('{:d} validation roidb entries'.format(len(valroidb)))
-    cfg.TRAIN.USE_FLIPPED = orgflip
+    cfg.TRAIN.USE_HOR_FLIPPED = hor_orgflip
+    cfg.TRAIN.USE_VER_FLIPPED = ver_orgflip
+    cfg.TRAIN.BRIGHT_ADJUEST = org_bright_adjuset
 
     return imdb, roidb, valroidb
 
@@ -137,7 +146,7 @@ if __name__ == '__main__':
     base_net = load_base_network()
 
     # train and valid data
-    imdb, roidb, valroidb = prepare_datas()
+    imdb, roidb, valroidb = prepare_datas(args.package_name)
 
     # output data directory
     output_dir, tb_dir = prepare_params()

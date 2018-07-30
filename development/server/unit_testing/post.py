@@ -23,9 +23,9 @@ def post(url, data):
     res = requests.post(url, json=data)
     return res
 
-host = 'http://192.168.1.210:16888/commdity_recognition/recognition'
-# host = 'http://192.168.1.176:16888/commdity_recognition/recognition'
-# host = 'http://121.8.142.254:16888/commdity_recognition/recognition'
+# host = 'http://192.168.1.210:16888/commdity_recognition/recognition'
+# host = 'http://192.168.1.105:16888/commdity_recognition/recognition'
+host = 'http://121.8.142.254:16888/commdity_recognition/recognition'
 # host = 'http://192.168.1.186:5000/predict/'
 # host = 'http://{}:{}/commdity_recognition/recognition'.format(sconfig.HOST_IP, sconfig.PROT)
 
@@ -33,7 +33,7 @@ def test():
     fn = 'test.json'
     data = get_data(fn)
     print(fn)
-    print(json.dumps(data, indent=4))
+    # print(json.dumps(data, indent=4))
 
     res = post(host, data)
 
@@ -47,7 +47,7 @@ def test_base64_code():
     fn = 'test.json'
     data = get_data(fn)
     print(fn)
-    print(json.dumps(data, indent=4))
+    # print(json.dumps(data, indent=4))
 
     print('Request URL:', host)
 

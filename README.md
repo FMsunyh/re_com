@@ -1,8 +1,8 @@
 # 商品识别
-## 服务安装部署
+## 商品识别服务安装部署
 ###  Conda 安装说明
 确保机器安装了Annaconda. 参考地址：https://www.anaconda.com/
-### python环境安装
+### 运行环境安装
 进入development目录，执行install.sh
 ```bash
 cd  '.../commdity_recognition/development/'
@@ -24,9 +24,12 @@ bash worker.sh
 ```python
 cd  '.../commdity_recognition/development/'
 python test_server.py -ip 192.168.1.210
-```
 
-如果看到一下输出，说明服务已经正常启动，以下为输出样例：
+```
+**192.168.1.210 服务部署的主机ip地址**
+
+
+如果看到以下输出，说明服务已经正常启动，以下为输出样例：
 ```json
 {
   "status": 100000,
@@ -40,7 +43,6 @@ python test_server.py -ip 192.168.1.210
   ],
   "msg": "success"
 }
- 
 ```
 
 ### 重启服务
@@ -54,3 +56,7 @@ bash reboot_worker.sh
 cd  '.../commdity_recognition/development/'
 bash kill_worker.sh
 ```
+
+商品识别服务部署说明文件
+编写：孙永海
+时间：2018年7月9日

@@ -6,7 +6,7 @@
 # @Software: ZJ_AI
 # =========================================================
 import json
-from server.algorithm.retinanet.config import LABEL_MAPPING_PATH
+from config import LABEL_MAPPING_PATH
 
 def _write_class_mapping(path):
     with open(path, 'w+') as f:

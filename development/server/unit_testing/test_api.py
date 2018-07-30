@@ -22,8 +22,8 @@ def post(url, data):
     res = requests.post(url, json=data)
     return res
 
-# host = 'http://192.168.1.210:16888/commdity_recognition/recognition'
-host = 'http://192.168.1.210:16888/commdity_recognition/recognition'
+# host = 'http://192.168.1.015:16888/commdity_recognition/recognition'
+host = 'http://192.168.1.210:16888/commdity_recognition/recognition_frcnn'
 # host = 'http://121.8.142.254:16888/commdity_recognition/recognition'
 # host = 'http://192.168.1.176:16888/commdity_recognition/recognition'
 

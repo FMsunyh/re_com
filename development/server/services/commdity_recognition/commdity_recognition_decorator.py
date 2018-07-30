@@ -11,6 +11,7 @@ import cv2
 import requests
 from PIL import Image
 
+import morelib.bin.predict_test
 from server.algorithm.retinanet.bin.predict import predict, visualize, get_prediect_label_bbox
 from server import logger
 from server.config import DOWNLOAD_DIR, OUTPUT_DIR
@@ -104,6 +105,31 @@ class CommdityRecognitionImp(object):
         except Exception as e:
             logger.error('occur error: %s', e, exc_info=True)
             return build_result(APIStatus.InternalServerError), to_http_status(APIStatus.InternalServerError)
+
+    @staticmethod
+    def recognition_frnn(ok, source):
+        try:
+            if ok:
+                tic = time.time()
+                print('start processing.............................................')
+
+                # 1. get image
+                image = CommdityRecognitionImp.get_image_from_base64(source)
+
+                # 2. predict
+                data = morelib.bin.predict_test.predict_frnn(image)
+
+                toc = time.time()
+                print("Request time: " + str(1000 * (toc - tic)) + " ms")
+                print(data)
+                return build_result(APIStatus.Ok, data=data), to_http_status(APIStatus.Ok)
+            else:
+                return source, to_http_status(source['status'])
+
+        except Exception as e:
+            logger.error('occur error: %s', e, exc_info=True)
+            return build_result(APIStatus.InternalServerError), to_http_status(APIStatus.InternalServerError)
+
     @staticmethod
     def get_urls(source):
         urls = source['payload']['data']['image_address']
@@ -234,4 +260,4 @@ class CommdityRecognitionImp(object):
             print(exc)
 
 
-commdity_recognition_decorator = build_passing_decorator_class(['recognition'], 'commdity_recognition_decorator', CommdityRecognitionImp)
+commdity_recognition_decorator = build_passing_decorator_class(['recognition','recognition_frnn'], 'commdity_recognition_decorator', CommdityRecognitionImp)
