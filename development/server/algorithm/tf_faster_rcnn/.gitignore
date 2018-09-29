@@ -15,7 +15,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -113,6 +112,8 @@ logs/
 imgs/
 *.jpg
 *.JPG
+*.PNG
+*.png
 
 /model
 output
@@ -126,3 +127,19 @@ lib/pycocotools/_mask.so
 data/predict_data/
 
 data/model
+
+data/cache_169/
+
+data/cfgs/com_classes_169\.txt
+
+data/demo/
+
+experiments/cfgs/
+
+data/args_parse/
+
+data/file_dict/
+
+experiments/classes_cfgs/
+
+experiments/

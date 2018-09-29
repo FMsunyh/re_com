@@ -12,24 +12,23 @@
 
 import os
 import os.path as osp
-import sys
 import zjai_createData.zjai_3_check_data
 
-def get_all_label(dataSetDir,type,root_dir,setname):
+def get_all_label(type,root_dir,setname):
     labelList=["__background__"]
-    mainDir=osp.join(dataSetDir,"data","cfg")
-    with open(os.path.join(mainDir,"labelCount_{}.txt".format(type)),"r") as f:
+    with open(os.path.join(root_dir,"labelCount_{}.txt".format(type)),"r") as f:
         lineList=f.readlines()
         for i in range(len(lineList)-2):
             line=lineList[i].split(":")[0].strip()
             labelList.append(line)
     print(labelList)
-    with open(root_dir+"data/cfgs/{}_classes.txt".format(setname),'w') as f:
+    with open(root_dir+"/{}_classes.txt".format(setname),'w') as f:
         f.write("\n".join(labelList))
 
 if __name__=="__main__":
     root_dir = osp.abspath(osp.join(osp.dirname(__file__), '..'))
     fileType = 'trainval'
+    root_dir = '/home/hyl/data/ljk/github-pro/zjai-com/data/train_data/train_data-2018-08-15_resize'
     setname="voc"
-    zjai_createData.zjai_3_checkData.analysis_data(root_dir,fileType)
+    zjai_createData.zjai_3_check_data.analysis_data(root_dir,fileType)
     get_all_label(fileType,root_dir,setname)

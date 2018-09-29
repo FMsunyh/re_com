@@ -11,11 +11,8 @@
 # =========================================================
 
 
-import os
 import os.path as osp
-import random
-from data_processing.utils.io_utils import *
-from zjai_createData import check_exist
+from morelib.utils.io_utils import *
 from zjai_createData.check_exist import get_all_file
 
 def _create_Main(dataDirs,fileList,scale):
@@ -50,6 +47,9 @@ def _create_Main(dataDirs,fileList,scale):
     with open(dataDirs+'/ImageSets/Main/test.txt','w+') as f:
         f.writelines(test_images)
         print("{}, numbers:{}".format(dataDirs + '/test.txt', len(test_images)))
+    with open(dataDirs+'/ImageSets/Main/trainval_test.txt','w+') as f:
+        f.writelines(trainval_images)
+        f.writelines(test_images)
 
     print('total: {}'.format(len(fileList)))
     print('step: {}'.format(len(trainval_images)//2+1))
@@ -85,15 +85,23 @@ def _create_Main_new(dataDirs,fileList,scale):
     with open(dataDirs+'/ImageSets/Main/test.txt','w+') as f:
         f.writelines(test_images)
         print("{}, numbers:{}".format(dataDirs + '/test.txt', len(test_images)))
+    with open(dataDirs+'/ImageSets/Main/trainval_test.txt','w+') as f:
+        f.writelines(trainval_images)
+        f.writelines(test_images)
     with open(dataDirs+'/ImageSets/Main/filedict.txt','w+') as f:
         for key in fileDict.keys():
             f.write("{}|{}\n".format(key,fileDict[key]))
     print('total: {}'.format(len(fileList)))
     print('step: {}'.format(len(trainval_images)//2+1))
 
+def create_package_main(data_dir,scale):
+    fileList = get_all_file(data_dir, fileType="jpg")
+    _create_Main_new(data_dir, fileList, scale)
+
 if __name__=="__main__":
     root_dir = osp.abspath(osp.join(osp.dirname(__file__), '..'))
-    dataDirs = osp.join(root_dir, 'data', 'test_data')
+    dataDirs = osp.join(root_dir, 'data', 'predict_data',"test_data-2018-07-24")
+    dataDirs = '/home/hyl/data/ljk/github-pro/zjai-com/data/train_data/train_data-2018-08-15_resize'
     scale = 9
     fileList=get_all_file(dataDirs,fileType="jpg")
     _create_Main_new(dataDirs,fileList,scale)
