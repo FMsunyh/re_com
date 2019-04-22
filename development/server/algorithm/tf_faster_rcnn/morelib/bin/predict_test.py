@@ -8,8 +8,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from tools import _init_paths
-from model.config import cfg
+from server.algorithm.tf_faster_rcnn.tools import _init_paths
+from server.algorithm.tf_faster_rcnn.lib.model.config import cfg
 
 import cv2
 import argparse
@@ -37,9 +37,9 @@ def parse_args():
     parser.add_argument('--set_name', dest='set_name', help='the name of the classes file',
                         default="com")
     parser.add_argument('--model_dir', dest='model_dir', help='the path of  stored the model file',
-                        default=osp.join(cfg.ROOT_DIR, "data","model"))
+                        default=osp.join(cfg.ROOT_DIR, "data","model","release_weight"))
     parser.add_argument('--model_data', dest='model_data', help='the name of  stored the model file',
-                        default="vgg16_faster_rcnn_iter_3335000.ckpt")
+                        default="vgg16_faster_rcnn.ckpt")
     parser.add_argument('--predict_dir', dest='predict_dir', help='prepare to predict this image',
                         default=osp.join(cfg.ROOT_DIR, "data"))
     parser.add_argument('--package_data', dest='package_data', help='the test package data file name',
@@ -70,20 +70,33 @@ def predict_proc(sess, net, image):
     return result_data
 
 args = parse_args()
-CLASSES = pascal_voc.read_classes(os.path.join(args.root_dir,"cfgs","{}_classes.txt".format(args.set_name)))
+# CLASSES = pascal_voc.read_classes(os.path.join(args.root_dir,"cfgs","{}_classes.txt".format(args.set_name)))
+# classes_path = os.path.join(cfg.ROOT_DIR,'experiments', 'classes_cfgs',"{}".format("fruit_classes.txt"))
+classes_path = os.path.join(args.model_dir,"{}".format("com_classes.txt"))
+# classes_path = os.path.join(cfg.ROOT_DIR,'experiments', 'classes_cfgs',"{}".format("com_classes_169.txt"))
+CLASSES = pascal_voc.read_classes(classes_path)
+
+print(classes_path)
+print(CLASSES)
+
+# set config
+tfconfig = tf.ConfigProto(allow_soft_placement=True)
+tfconfig.gpu_options.allow_growth = True
+tf_model = prepare_model.get_tf_model(args.model_dir, args.model_data)
+
+print(tf_model)
+# init session
+sess = tf.Session(config=tfconfig)
+
+saver, net = prepare_model.load_model(sess, args.demo_net, tf_model, len(CLASSES))
 
 def predict_frnn(image):
     cfg.TEST.HAS_RPN = True  # Use RPN for proposals
 
-    tf_model = prepare_model.get_tf_model(args.model_dir, args.model_data)
-    # set config
-    tfconfig = tf.ConfigProto(allow_soft_placement=True)
-    tfconfig.gpu_options.allow_growth = True
-
-    # init session
-    sess = tf.Session(config=tfconfig)
     # load network
-    saver, net = prepare_model.load_model(sess, args.demo_net, tf_model, len(CLASSES))
+    global saver,net
+    if saver is None or net is None:
+        saver, net = prepare_model.load_model(sess, args.demo_net, tf_model, len(CLASSES))
 
     return predict_proc(sess, net, image)
 
@@ -102,5 +115,36 @@ def main():
 
     predict_test(sess, net, args)
 
-if __name__ == '__main__':
-    main()
+
+# def predict_frnn(image):
+#     cfg.TEST.HAS_RPN = True  # Use RPN for proposals
+#
+#     tf_model = prepare_model.get_tf_model(args.model_dir, args.model_data)
+#     # set config
+#     tfconfig = tf.ConfigProto(allow_soft_placement=True)
+#     tfconfig.gpu_options.allow_growth = True
+#
+#     # init session
+#     sess = tf.Session(config=tfconfig)
+#     # load network
+#     saver, net = prepare_model.load_model(sess, args.demo_net, tf_model, len(CLASSES))
+#
+#     return predict_proc(sess, net, image)
+#
+# def main():
+#     cfg.TEST.HAS_RPN = True  # Use RPN for proposals
+#
+#     tf_model = prepare_model.get_tf_model(args.model_dir, args.model_data)
+#     # set config
+#     tfconfig = tf.ConfigProto(allow_soft_placement=True)
+#     tfconfig.gpu_options.allow_growth = True
+#
+#     # init session
+#     sess = tf.Session(config=tfconfig)
+#     # load network
+#     saver, net = prepare_model.load_model(sess, args.demo_net, tf_model, len(CLASSES))
+#
+#     predict_test(sess, net, args)
+#
+# if __name__ == '__main__':
+#     main()

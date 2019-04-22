@@ -138,6 +138,17 @@ def predict_image(sess,net,im,CLASSES):
         box, classname, flag, score = _get_thresh_label(cls, dets, thresh=CONF_THRESH)
         if flag == -1:
             continue
-        for i in range(len(classname)):
-            result_data.append("{},{:.3f},{},{},{},{}".format(classname[i],score[i],int(box[i, 0]),int(box[i, 1]),int(box[i, 2]),int(box[i, 3])))
+
+        vgg_166 = True
+        if vgg_166:
+            for i in range(len(classname)):
+                result_data.append(
+                    "{},{:.3f},{},{},{},{}".format(classname[i], score[i], int(box[i, 0]), int(box[i, 1]),
+                                                   int(box[i, 2]), int(box[i, 3])))
+        else:
+            for i in range(len(classname)):
+                if classname[i] in CLASSES[1:7]:
+                    result_data.append(
+                        "{},{:.3f},{},{},{},{}".format(classname[i], score[i], int(box[i, 0]), int(box[i, 1]),
+                                                       int(box[i, 2]), int(box[i, 3])))
     return result_data

@@ -1,6 +1,7 @@
 # coding: utf-8
 # import所需模块
 import base64
+import datetime
 import os
 import shutil
 import time
@@ -11,7 +12,7 @@ import cv2
 import requests
 from PIL import Image
 
-import morelib.bin.predict_test
+from server.algorithm.tf_faster_rcnn.morelib.bin.predict_test import predict_frnn
 from server.algorithm.retinanet.bin.predict import predict, visualize, get_prediect_label_bbox
 from server import logger
 from server.config import DOWNLOAD_DIR, OUTPUT_DIR
@@ -24,64 +25,22 @@ import numpy as np
 
 import server.config
 
-class CommdityRecognitionImp(object):
+USE_FRNN = True
 
-    # @staticmethod
-    # def recognition(ok, source):
-    #     try:
-    #         if ok:
-    #
-    #             tic = time.time()
-    #             # img_url = CommdityRecognitionImp.get_urls(source)
-    #             image_path, file_name = CommdityRecognitionImp.get_image(source)
-    #
-    #             image_path = '/home/syh/commdity_recognition/development/server/data/download/train_20180307_1725.jpg'
-    #             if image_path != '':
-    #                 imageinfo = CommdityRecognitionImp.create_imageinfo(file_name=file_name)
-    #                 imageinfo.path = image_path
-    #
-    #             # elif img_url != '':
-    #             #     imageinfo = CommdityRecognitionImp.create_imageinfo(url=img_url)
-    #             #     imageinfo.address = img_url
-    #             #     CommdityRecognitionImp.download_image(imageinfo, output_dir=DOWNLOAD_DIR)
-    #
-    #
-    #             print('start processing.............................................')
-    #             # 1. get image
-    #             image = read_image_bgr(imageinfo.path)
-    #             # copy to draw on
-    #
-    #             # 2. predict
-    #             # boxes, scores, labels = predict(image)
-    #             boxes, scores, labels = (1,1,1)
-    #
-    #             data = get_prediect_label_bbox(boxes, scores, labels)
-    #             # make the return data
-    #             # im_draw = visualize(draw, predicted_labels, scores, detections)
-    #
-    #             # im = Image.fromarray(im_draw)
-    #             # im_path = os.path.join(OUTPUT_DIR, str(imageinfo.name)+imageinfo.image_extension)
-    #             # im.save(im_path)
-    #
-    #             toc = time.time()
-    #             print(str(1000 * (toc-tic)) + " ms")
-    #
-    #             # out_path = '{}:{}{}{}'.format(server.config.HOST_IP, server.config.PROT, '/static/images/',str(imageinfo.name) + imageinfo.image_extension)
-    #             # print(out_path)
-    #             # data['address'] = out_path
-    #
-    #
-    #
-    #             return build_result(APIStatus.Ok, data=data), to_http_status(APIStatus.Ok)
-    #         else:
-    #             return source, to_http_status(source['status'])
-    #
-    #     except Exception as e:
-    #         logger.error('occur error: %s', e, exc_info=True)
-    #         return build_result(APIStatus.InternalServerError), to_http_status(APIStatus.InternalServerError)
+global request_count
+request_count = 0
+
+class CommdityRecognitionImp(object):
 
     @staticmethod
     def recognition(ok, source):
+        if USE_FRNN:
+            return CommdityRecognitionImp.recognition_frnn(ok, source)
+        else:
+            return CommdityRecognitionImp.recognition_RetinaNet(ok, source)
+
+    @staticmethod
+    def recognition_RetinaNet(ok, source):
         try:
             if ok:
                 tic = time.time()
@@ -117,7 +76,7 @@ class CommdityRecognitionImp(object):
                 image = CommdityRecognitionImp.get_image_from_base64(source)
 
                 # 2. predict
-                data = morelib.bin.predict_test.predict_frnn(image)
+                data = predict_frnn(image)
 
                 toc = time.time()
                 print("Request time: " + str(1000 * (toc - tic)) + " ms")
@@ -138,19 +97,6 @@ class CommdityRecognitionImp(object):
         return urls
 
     @staticmethod
-    def download_images(img_urls, output_dir=''):
-
-        images = []
-        for url in img_urls:
-            namespace_dns = uuid.UUID('6ba7b810-9dad-11d1-80b4-00c04fd430c8')
-            file_name = uuid.uuid3(namespace_dns, url)
-            image = ImageInfo(file_name, url)
-            images.append(image)
-            CommdityRecognitionImp.download_image(image, output_dir)
-
-        return images
-
-    @staticmethod
     def create_imageinfo(url='', file_name=''):
         if url != '':
             namespace_dns = uuid.UUID('6ba7b810-9dad-11d1-80b4-00c04fd430c8')
@@ -163,54 +109,6 @@ class CommdityRecognitionImp(object):
         return image
 
     @staticmethod
-    def download_image(image, output_dir=''):
-        try:
-            if not os.path.exists(output_dir):
-                logger.warning('%s, This folder is not exist, it will be create.', output_dir)
-                os.makedirs(output_dir)
-
-            # file_suffix = os.path.splitext(image.address)[1]
-
-            image_path = '{}{}{}{}'.format(output_dir, os.sep, image.name, image.image_extension)
-
-            all_format = ['jpg']
-            img_format = image.address.split(".")[-1]
-            if img_format.lower() not in all_format:
-                print('not a valid image')
-                raise Exception
-
-            ir = requests.get(image.address)
-            with open(image_path, 'wb') as fp:
-                fp.write(ir.content)
-                image.path = image_path
-                logger.debug('download the image:%s' % image.address)
-        except IOError as e:
-            logger.error('File operation error: %s', e, exc_info=True)
-        except Exception as e:
-            logger.error('Error: %s', e, exc_info=True)
-
-    @staticmethod
-    def get_image(image_msg):
-        base64_code = image_msg['payload']['data']['base64_code']
-        if base64_code =='':
-            return '', ''
-
-        # code = test.json[23:]
-        code = base64_code.split(',')[1]
-        suffix = base64_code.split(',')[0].split(';')[0].split('/')[1]
-
-        image = base64.b64decode(code)
-        img = Image.open(BytesIO(image))
-
-        file_name = uuid.uuid1()
-        image_path = '%s%s%s%s' % (DOWNLOAD_DIR, file_name, '.', suffix)
-        CommdityRecognitionImp.im_save(image_path, img)
-
-        print("file name:", file_name)
-        print("image path:", image_path)
-        return image_path, file_name
-
-    @staticmethod
     def get_image_from_base64(image_msg):
         base64_code = image_msg['payload']['data']['base64_code']
         code = base64_code.split(',')[1]
@@ -218,14 +116,68 @@ class CommdityRecognitionImp(object):
         image = base64.b64decode(code)
         img = Image.open(BytesIO(image))
 
-        file_name = uuid.uuid1()
-        image_path = '%s%s%s%s' % (DOWNLOAD_DIR, file_name, '.', 'jpg')
-        CommdityRecognitionImp.im_save(image_path, img)
+        img_b64decode = image
+
+
+        # file_name = uuid.uuid1()
+        global request_count
+        request_count += 1
+        file_name = str(request_count)
+        cur_date = datetime.datetime.now()
+        str_date = '{year}-{month}-{day}'.format(year=cur_date.year, month=cur_date.month, day=cur_date.day)
+        dir = os.path.join(DOWNLOAD_DIR, str_date)
+
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+            request_count = 0
+
+        image_path = os.path.join(dir,  file_name+'.'+'jpg')
+        print(image_path)
+        with open(image_path, 'wb') as f:
+            f.write(img_b64decode)
+
+
+        # img = Image.fromarray(img.astype('uint8'))
+        # img = Image.fromarray(img, mode='RGB')
+        # CommdityRecognitionImp.im_save(image_path, img)
 
         img = np.asarray(img.convert('RGB'))
 
+        print(img.shape)
         return img[:, :, ::-1].copy()
 
+    # @staticmethod
+    # def get_image_from_base64(image_msg):
+    #     base64_code = image_msg['payload']['data']['base64_code']
+    #     code = base64_code.split(',')[1]
+    #
+    #     image = base64.b64decode(code)
+    #     img = Image.open(BytesIO(image))
+    #
+    #     # img_b64decode = base64.b64decode(code)
+    #     # img = np.fromstring(img_b64decode, np.uint8)
+    #
+    #     # file_name = uuid.uuid1()
+    #     global request_count
+    #     request_count += 1
+    #     file_name = str(request_count)
+    #     cur_date = datetime.datetime.now()
+    #     str_date = '{year}-{month}-{day}'.format(year=cur_date.year, month=cur_date.month, day=cur_date.day)
+    #     dir = os.path.join(DOWNLOAD_DIR, str_date)
+    #
+    #     if not os.path.exists(dir):
+    #         os.makedirs(dir)
+    #         request_count = 0
+    #
+    #     image_path = os.path.join(dir, file_name + '.' + 'jpg')
+    #     print(image_path)
+    #     CommdityRecognitionImp.im_save(image_path, img)
+    #
+    #     img = np.asarray(img.convert('RGB'))
+    #
+    #     print(img.shape)
+    #     return img[:, :, ::-1].copy()
+    #
     @staticmethod
     def im_save(path, image):
         ret = -1

@@ -25,7 +25,7 @@ def post(url, data):
 
 # host = 'http://192.168.1.210:16888/commdity_recognition/recognition'
 # host = 'http://192.168.1.105:16888/commdity_recognition/recognition'
-host = 'http://121.8.142.254:16888/commdity_recognition/recognition'
+host = 'http://121.8.142.253:16688/commdity_recognition/recognition'
 # host = 'http://192.168.1.186:5000/predict/'
 # host = 'http://{}:{}/commdity_recognition/recognition'.format(sconfig.HOST_IP, sconfig.PROT)
 

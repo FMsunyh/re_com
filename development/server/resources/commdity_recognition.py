@@ -25,4 +25,5 @@ class CommdityRecognitionFRNN(Resource):
 
 ns = api.namespace(name="commdity_recognition", description='commdity recognition interface')
 ns.add_resource(CommdityRecognition, '/recognition')
-ns.add_resource(CommdityRecognitionFRNN, '/recognition_frcnn')
+# ns.add_resource(CommdityRecognition, '/fast_moving_recognition')
+# ns.add_resource(CommdityRecognitionFRNN, '/recognition_frcnn')

@@ -24,26 +24,14 @@ def post(url, data):
 
 # host = 'http://192.168.1.015:16888/commdity_recognition/recognition'
 # host = 'http://192.168.1.210:16887/commdity_recognition/recognition'
-#host = 'http://121.8.142.254:16666/commdity_recognition/fast_moving_recognition'
-host = 'http://121.8.142.253:16688/commdity_recognition/recognition'
+host = 'http://121.8.142.254:16666/commdity_recognition/fast_moving_recognition'
+# host = 'http://121.8.142.254:16666/commdity_recognition/recognition'
 # host = 'http://192.168.1.186:15555/commdity_recognition/recognition'
 # host = 'http://192.168.1.176:16888/commdity_recognition/recognition'
 
 
-def test_base64_code():
-    fn = 'test_com.json'
-    data = get_data(fn)
-    print('data file: {}'.format(fn))
-    # print(json.dumps(data, indent=4))
-    print('Request URL:', host)
-
-    res = post(host, data)
-
-    print('Response Body(return value):')
-    pprint.pprint(res.text)
-
 def test_api():
-    fn = 'test_com.json'
+    fn = 'test.json'
     data = get_data(fn)
     print('data file: {}'.format(fn))
     # print(json.dumps(data, indent=4))
@@ -61,12 +49,6 @@ def run():
 
     print('proccess time: {}'.format(str(1000 * (toc - tic)) + " ms"))
 
-# if __name__ == "__main__":
-#     p = multiprocessing.pool.Pool()
-#     for i in range(20):
-#         p.apply_async(run, args=())
-#     p.close()
-#     p.join()
 
 if __name__ == "__main__":
     run()
