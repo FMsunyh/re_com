@@ -16,7 +16,7 @@ matplotlib==3.0.0
 mkl-fft==1.0.4
 mkl-random==1.0.1
 networkx==2.2
-numpy==1.15.1
+numpy==1.22.0
 opencv-python==3.4.3.18
 Pillow==5.2.0
 prettytable==0.7.2
